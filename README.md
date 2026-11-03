@@ -1,36 +1,16 @@
-# 🚀 Nova Mini CRM
+# Nova Mini CRM v2 – React 19 + TypeScript + Groq Agent
 
-> Lightweight, fast, and secure Lead Management & Agent Performance dashboard.
+Live: https://nova-mini-crm.vercel.app
 
-Built for **Nova** — to track leads, scores, status, and agent activity in real-time.
+**Stack matches Nova Legal Funding job:**
+- Next.js 15.3.2 (React 19) + TypeScript – app router
+- Supabase Postgres with RLS – `leads` & `agent_logs` (auth.uid() = owner_id)
+- Fee math – Math.round(amount * fee_rate * 100)/100 – no floating error
+- Groq Agent – llama3-8b-8192 – tool call, writes score to leads, logs to agent_logs with approved=false (human-in-loop)
+- Vercel deploy + GitHub Actions ready 
 
-Live Demo: `https://nova-mini-crm.vercel.app` (after deploy)
+### API
+POST /api/groq-agent – { leadId, lead } -> Groq -> score + summary + followUpDraft
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black) ![Supabase](https://img.shields.io/badge/Supabase-RLS-green) ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black)
-
-### ✨ Features
-- **Lead Pipeline** - Name, email, status (new/contacted/qualified/closed), score
-- **Real-time Data** - Powered by Supabase Postgres with Row Level Security (RLS)
-- **Agent Logs** - Track every agent action with timestamps
-- **Secure** - Anon + Service Role keys, RLS policies on `leads` & `agent_logs`
-- **Fast** - Next.js 14 App Router, SSR, Mobile-first
-- **Zero Setup CRM** - Works directly on Infinix Smart 7 HD & any device
-
-### 🛠 Tech Stack
-- **Frontend:** Next.js 14, React 18
-- **Backend:** Supabase (Postgres, Auth, RLS)
-- **Deploy:** Vercel
-- **Style:** Inline System UI (lightweight, no Tailwind overhead)
-
-### 📦 Database Schema
-**Supabase Project:** `dunievanwwendykrseir.supabase.co`
-
-**Tables:**
-- `leads` (id, name, email, status, score, created_at) - RLS Enabled
-- `agent_logs` (id, action, agent_id, created_at) - RLS Enabled
-
-### 🔐 Environment Variables
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://dunievanwwendykrseir.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
+### Env
+NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GROQ_API_KEY
