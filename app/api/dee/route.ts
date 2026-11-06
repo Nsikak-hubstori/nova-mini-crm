@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   const { message } = await req.json();
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-
   let reply = "Hi, I'm Dee. I can help you manage leads, calculate fees, and summarize cases. What do you need?";
-
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -22,10 +18,15 @@ export async function POST(req: Request) {
     });
     const data = await groqRes.json();
     if (data.choices?.[0]?.message?.content) reply = data.choices[0].message.content;
+    if (data.error) reply = "Groq error: " + data.error.message;
   } catch {}
 
-  // Log to Supabase for Human-in-Loop
-  await supabase.from("agent_logs").insert({ action: message, agent: "Dee", approved: false });
+  // Log in background – NEVER block Dee if Supabase fails
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+    await supabase.from("agent_logs").insert({ action: message, agent: "Dee", approved: false });
+  } catch {}
 
   return NextResponse.json({ reply });
-      }
+}
