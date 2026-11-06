@@ -6,8 +6,8 @@ type Lead = {
   email: string;
   status: string;
   score: number | null;
-  amount: number;
-  fee_rate: number;
+  amount: number | null;
+  fee_rate: number | null;
   created_at: string;
 };
 
@@ -60,13 +60,16 @@ export default async function Page() {
         </thead>
         <tbody>
           {leads?.map((l) => {
-            const fee = Math.round(l.amount * (l.fee_rate || 0.15) * 100) / 100;
+            // FIX: If amount is null / empty / text, use 0 so it never shows $NaN
+            const amountNum = Number(l.amount) || 0;
+            const feeRate = Number(l.fee_rate) || 0.15;
+            const fee = Math.round(amountNum * feeRate * 100) / 100;
             return (
               <tr key={l.id} style={{ borderBottom: "1px solid #222" }}>
                 <td style={{ padding: 10 }}>{l.name}</td>
                 <td style={{ fontSize: 12 }}>{l.email}</td>
                 <td>{l.status}</td>
-                <td>${l.amount}</td>
+                <td>${amountNum}</td>
                 <td>${fee}</td>
                 <td>
                   {l.score ?? "-"}
@@ -101,4 +104,4 @@ export default async function Page() {
       </div>
     </main>
   );
-}
+                                }
